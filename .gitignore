@@ -1,0 +1,44 @@
+# Build outputs
+[Bb]in/
+[Oo]bj/
+**/[Bb]in/
+**/[Oo]bj/
+artifacts/
+TestResults/
+*.nupkg
+*.snupkg
+*.pdb
+
+# Visual Studio / Rider / VS Code local state
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Logs and local caches
+*.log
+*.cache
+*.tmp
+*.temp
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.pfx
+*.key
+*.cer
+*.crt
+*secret*
+*token*
+*credential*
+
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store

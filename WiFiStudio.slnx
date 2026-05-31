@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/WiFiStudio.App/WiFiStudio.App.csproj">
+      <Platform Project="x64" />
+    </Project>
+    <Project Path="src/WiFiStudio.Core/WiFiStudio.Core.csproj" />
+    <Project Path="src/WiFiStudio.Rendering/WiFiStudio.Rendering.csproj" />
+    <Project Path="src/WiFiStudio.Tests/WiFiStudio.Tests.csproj" />
+  </Folder>
+</Solution>

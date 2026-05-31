@@ -1,0 +1,174 @@
+{
+  "schemaVersion": "1.0",
+  "id": "sample-office",
+  "name": "Sample Office",
+  "createdAtUtc": "2026-05-30T00:00:00+00:00",
+  "modifiedAtUtc": "2026-05-30T00:00:00+00:00",
+  "floorPlan": {
+    "name": "Main Floor",
+    "widthCm": 2500,
+    "heightCm": 1600,
+    "gridSizeCm": 25,
+    "walls": [
+      {
+        "id": "north-wall",
+        "name": "North Wall",
+        "isVisible": true,
+        "isLocked": false,
+        "center": { "x": 1250, "y": 40 },
+        "lengthCm": 2500,
+        "thicknessCm": 16,
+        "rotationDegrees": 0,
+        "materialId": "concrete",
+        "overrideAttenuationDb": null
+      },
+      {
+        "id": "south-wall",
+        "name": "South Wall",
+        "isVisible": true,
+        "isLocked": false,
+        "center": { "x": 1250, "y": 1560 },
+        "lengthCm": 2500,
+        "thicknessCm": 16,
+        "rotationDegrees": 0,
+        "materialId": "concrete",
+        "overrideAttenuationDb": null
+      },
+      {
+        "id": "west-wall",
+        "name": "West Wall",
+        "isVisible": true,
+        "isLocked": false,
+        "center": { "x": 40, "y": 800 },
+        "lengthCm": 1600,
+        "thicknessCm": 16,
+        "rotationDegrees": 90,
+        "materialId": "concrete",
+        "overrideAttenuationDb": null
+      },
+      {
+        "id": "east-wall",
+        "name": "East Wall",
+        "isVisible": true,
+        "isLocked": false,
+        "center": { "x": 2460, "y": 800 },
+        "lengthCm": 1600,
+        "thicknessCm": 16,
+        "rotationDegrees": 90,
+        "materialId": "concrete",
+        "overrideAttenuationDb": null
+      },
+      {
+        "id": "meeting-divider",
+        "name": "Meeting Room Divider",
+        "isVisible": true,
+        "isLocked": false,
+        "center": { "x": 850, "y": 650 },
+        "lengthCm": 1000,
+        "thicknessCm": 12,
+        "rotationDegrees": 90,
+        "materialId": "glass",
+        "overrideAttenuationDb": null
+      },
+      {
+        "id": "office-divider",
+        "name": "Office Divider",
+        "isVisible": true,
+        "isLocked": false,
+        "center": { "x": 1450, "y": 850 },
+        "lengthCm": 1200,
+        "thicknessCm": 12,
+        "rotationDegrees": 0,
+        "materialId": "drywall",
+        "overrideAttenuationDb": null
+      }
+    ],
+    "doors": [],
+    "windows": [],
+    "furniture": [],
+    "accessPoints": [
+      {
+        "id": "ap-1",
+        "name": "AP-1",
+        "isVisible": true,
+        "isLocked": false,
+        "position": { "x": 650, "y": 500 },
+        "band": "Ghz5",
+        "txPowerDbm": 18,
+        "channel": 36,
+        "bandwidthMhz": 40,
+        "isEnabled": true
+      }
+    ],
+    "virtualUsers": [
+      {
+        "id": "focus-area",
+        "name": "Focus Area",
+        "isVisible": true,
+        "isLocked": false,
+        "position": { "x": 1850, "y": 1050 },
+        "weight": 3.0,
+        "route": []
+      }
+    ]
+  },
+  "materials": [
+    {
+      "id": "drywall",
+      "name": "Gypsum Board",
+      "category": "Wall",
+      "attenuationDb": 3.0,
+      "colorHex": "#D3C8B8",
+      "isConductive": false
+    },
+    {
+      "id": "glass",
+      "name": "Glass",
+      "category": "Opening",
+      "attenuationDb": 2.0,
+      "colorHex": "#8FD3FF",
+      "isConductive": false
+    },
+    {
+      "id": "wood",
+      "name": "Wood",
+      "category": "Interior",
+      "attenuationDb": 4.0,
+      "colorHex": "#B8834B",
+      "isConductive": false
+    },
+    {
+      "id": "concrete",
+      "name": "Concrete",
+      "category": "Structural",
+      "attenuationDb": 9.0,
+      "colorHex": "#9EA3A8",
+      "isConductive": false
+    },
+    {
+      "id": "metal",
+      "name": "Metal",
+      "category": "Structural",
+      "attenuationDb": 16.0,
+      "colorHex": "#66717E",
+      "isConductive": true
+    },
+    {
+      "id": "brick",
+      "name": "Brick",
+      "category": "Structural",
+      "attenuationDb": 7.0,
+      "colorHex": "#A54E3E",
+      "isConductive": false
+    }
+  ],
+  "simulationSettings": {
+    "frequencyBand": "Ghz5",
+    "heatmapType": "Rssi",
+    "sampleResolutionCm": 50,
+    "coverageThresholdDbm": -67,
+    "shadowThresholdDbm": -82,
+    "noiseFloorDbm": -92,
+    "interferencePenaltyDb": 0
+  }
+}

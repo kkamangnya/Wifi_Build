@@ -1,0 +1,280 @@
+<Window
+    x:Class="WiFiStudio.App.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:WiFiStudio.App.Controls"
+    Title="WiFi Studio Pro">
+    <Grid x:Name="Root" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="176" />
+            <RowDefinition Height="28" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="184" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="292" />
+        </Grid.ColumnDefinitions>
+
+        <CommandBar Grid.Row="0" Grid.ColumnSpan="3" DefaultLabelPosition="Right">
+            <CommandBar.Content>
+                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding ProjectName}" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    <ComboBox Width="112" ItemsSource="{Binding FrequencyOptions}" SelectedItem="{Binding SelectedFrequency, Mode=TwoWay}" />
+                    <ComboBox Width="168" ItemsSource="{Binding HeatmapModeOptions}" SelectedItem="{Binding SelectedHeatmapMode, Mode=TwoWay}" />
+                    <ComboBox Width="156" ItemsSource="{Binding MaterialOptions}" SelectedItem="{Binding SelectedMaterial, Mode=TwoWay}" DisplayMemberPath="Name" />
+                    <Button
+                        MinWidth="172"
+                        Command="{Binding RecommendApCommand}"
+                        Content="Recommend Best AP"
+                        Style="{StaticResource AccentButtonStyle}" />
+                    <TextBlock Text="{Binding SimulationState}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+            </CommandBar.Content>
+            <AppBarButton Icon="Add" Label="New" Command="{Binding NewProjectCommand}" />
+            <AppBarButton Icon="OpenFile" Label="Open" Command="{Binding OpenProjectCommand}" />
+            <AppBarButton Icon="Save" Label="Save" Command="{Binding SaveProjectCommand}" />
+            <AppBarButton Icon="Undo" Label="Undo" Command="{Binding UndoCommand}" />
+            <AppBarButton Icon="Redo" Label="Redo" Command="{Binding RedoCommand}" />
+            <AppBarButton Icon="Delete" Label="Delete" Command="{Binding DeleteSelectedCommand}" />
+            <AppBarSeparator />
+            <AppBarButton Icon="Play" Label="Run" Command="{Binding RunSimulationCommand}" />
+            <AppBarButton Icon="Cancel" Label="Cancel" Command="{Binding CancelSimulationCommand}" />
+            <AppBarButton Icon="Bullets" Label="Wizard" Command="{Binding RunWizardCommand}" />
+            <AppBarButton Icon="Download" Label="CSV" Command="{Binding ExportCsvCommand}" />
+            <AppBarButton Icon="Download" Label="PNG" Command="{Binding ExportPngCommand}" />
+            <AppBarButton Icon="Download" Label="SVG" Command="{Binding ExportSvgCommand}" />
+            <AppBarButton Icon="Download" Label="PDF" Command="{Binding ExportPdfCommand}" />
+        </CommandBar>
+
+        <Border Grid.Row="1" Grid.Column="0" Padding="12" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,1,0">
+            <ScrollViewer>
+            <StackPanel Spacing="10">
+                <TextBlock Text="Tools" FontSize="16" FontWeight="SemiBold" />
+                <Button Content="Select" Command="{Binding SetToolCommand}" CommandParameter="Select" HorizontalAlignment="Stretch" />
+                <CheckBox Content="Grid snap" IsChecked="{Binding SnapEnabled, Mode=TwoWay}" />
+                <Expander Header="Layers" IsExpanded="False">
+                    <StackPanel Spacing="4">
+                        <CheckBox Content="Heatmap" IsChecked="{Binding HeatmapVisible, Mode=TwoWay}" />
+                        <CheckBox Content="Structures" IsChecked="{Binding StructuresVisible, Mode=TwoWay}" />
+                        <CheckBox Content="Objects" IsChecked="{Binding ObjectsVisible, Mode=TwoWay}" />
+                        <CheckBox Content="APs" IsChecked="{Binding AccessPointsVisible, Mode=TwoWay}" />
+                        <CheckBox Content="Users" IsChecked="{Binding UsersVisible, Mode=TwoWay}" />
+                    </StackPanel>
+                </Expander>
+                <Border Height="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}" Margin="0,8" />
+                <TextBlock Text="Active" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding ActiveToolText}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                <Expander Header="Structure" IsExpanded="True">
+                    <StackPanel Spacing="6">
+                        <Button Content="Wall" Command="{Binding SetToolCommand}" CommandParameter="Wall" HorizontalAlignment="Stretch" />
+                        <Button Content="Glass Door" Command="{Binding SetToolCommand}" CommandParameter="Object:GlassDoor" HorizontalAlignment="Stretch" />
+                        <Button Content="Wood Door" Command="{Binding SetToolCommand}" CommandParameter="Object:WoodDoor" HorizontalAlignment="Stretch" />
+                        <Button Content="Column" Command="{Binding SetToolCommand}" CommandParameter="Object:ConcreteColumn" HorizontalAlignment="Stretch" />
+                        <Button Content="Stairs" Command="{Binding SetToolCommand}" CommandParameter="Object:Stairs" HorizontalAlignment="Stretch" />
+                        <Button Content="Elevator" Command="{Binding SetToolCommand}" CommandParameter="Object:ElevatorShaft" HorizontalAlignment="Stretch" />
+                    </StackPanel>
+                </Expander>
+
+                <Expander Header="Furniture">
+                    <StackPanel Spacing="6">
+                        <Button Content="Desk" Command="{Binding SetToolCommand}" CommandParameter="Object:Desk" HorizontalAlignment="Stretch" />
+                        <Button Content="Chair" Command="{Binding SetToolCommand}" CommandParameter="Object:Chair" HorizontalAlignment="Stretch" />
+                        <Button Content="Sofa" Command="{Binding SetToolCommand}" CommandParameter="Object:Sofa" HorizontalAlignment="Stretch" />
+                        <Button Content="Bed" Command="{Binding SetToolCommand}" CommandParameter="Object:Bed" HorizontalAlignment="Stretch" />
+                        <Button Content="Bookshelf" Command="{Binding SetToolCommand}" CommandParameter="Object:Bookshelf" HorizontalAlignment="Stretch" />
+                        <Button Content="Cabinet" Command="{Binding SetToolCommand}" CommandParameter="Object:Cabinet" HorizontalAlignment="Stretch" />
+                        <Button Content="Conference Table" Command="{Binding SetToolCommand}" CommandParameter="Object:ConferenceTable" HorizontalAlignment="Stretch" />
+                        <Button Content="Partition" Command="{Binding SetToolCommand}" CommandParameter="Object:Partition" HorizontalAlignment="Stretch" />
+                    </StackPanel>
+                </Expander>
+
+                <Expander Header="Electronics">
+                    <StackPanel Spacing="6">
+                        <Button Content="TV" Command="{Binding SetToolCommand}" CommandParameter="Object:Tv" HorizontalAlignment="Stretch" />
+                        <Button Content="Refrigerator" Command="{Binding SetToolCommand}" CommandParameter="Object:Refrigerator" HorizontalAlignment="Stretch" />
+                        <Button Content="Washing Machine" Command="{Binding SetToolCommand}" CommandParameter="Object:WashingMachine" HorizontalAlignment="Stretch" />
+                        <Button Content="Microwave" Command="{Binding SetToolCommand}" CommandParameter="Object:Microwave" HorizontalAlignment="Stretch" />
+                        <Button Content="Server Rack" Command="{Binding SetToolCommand}" CommandParameter="Object:ServerRack" HorizontalAlignment="Stretch" />
+                        <Button Content="Metal Shelf" Command="{Binding SetToolCommand}" CommandParameter="Object:MetalShelf" HorizontalAlignment="Stretch" />
+                    </StackPanel>
+                </Expander>
+
+                <Expander Header="Network">
+                    <StackPanel Spacing="6">
+                        <Button Content="AP" Command="{Binding SetToolCommand}" CommandParameter="AccessPoint" HorizontalAlignment="Stretch" />
+                        <Button Content="Mesh Node" Command="{Binding SetToolCommand}" CommandParameter="Object:MeshNode" HorizontalAlignment="Stretch" />
+                        <Button Content="Router" Command="{Binding SetToolCommand}" CommandParameter="Object:Router" HorizontalAlignment="Stretch" />
+                    </StackPanel>
+                </Expander>
+
+                <Expander Header="User">
+                    <StackPanel Spacing="6">
+                        <Button Content="Person" Command="{Binding SetToolCommand}" CommandParameter="Object:Person" HorizontalAlignment="Stretch" />
+                        <Button Content="Fixed User" Command="{Binding SetToolCommand}" CommandParameter="Object:FixedUser" HorizontalAlignment="Stretch" />
+                        <Button Content="Mobile User" Command="{Binding SetToolCommand}" CommandParameter="Object:MobileUser" HorizontalAlignment="Stretch" />
+                        <Button Content="User Group" Command="{Binding SetToolCommand}" CommandParameter="Object:UserGroup" HorizontalAlignment="Stretch" />
+                        <Button Content="Route Point" Command="{Binding SetToolCommand}" CommandParameter="RoutePoint" HorizontalAlignment="Stretch" />
+                    </StackPanel>
+                </Expander>
+
+                <TextBlock Text="Floor" FontWeight="SemiBold" Margin="0,10,0,0" />
+                <TextBlock Text="{Binding FloorSizeText}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <Button Content="Sample Office" Command="{Binding SampleProjectCommand}" HorizontalAlignment="Stretch" Margin="0,8,0,0" />
+                <Button Content="Recover Autosave" Command="{Binding RecoverAutosaveCommand}" HorizontalAlignment="Stretch" />
+                <ComboBox Header="Recent" ItemsSource="{Binding RecentProjects}" SelectedItem="{Binding SelectedRecentProject, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                <Button Content="Open Recent" Command="{Binding OpenRecentProjectCommand}" HorizontalAlignment="Stretch" />
+                <Button Content="Export Materials" Command="{Binding ExportMaterialsCommand}" HorizontalAlignment="Stretch" />
+                <Button Content="Import Materials" Command="{Binding ImportMaterialsCommand}" HorizontalAlignment="Stretch" />
+            </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <Border Grid.Row="1" Grid.Column="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,1,0">
+            <controls:PlanCanvasControl x:Name="PlanCanvas" ViewModel="{Binding}" />
+        </Border>
+
+        <Border Grid.Row="1" Grid.Column="2" Padding="14">
+            <ScrollViewer>
+                <StackPanel Spacing="14">
+                    <TextBlock Text="Inspector" FontSize="16" FontWeight="SemiBold" />
+                    <TextBox Header="Name" Text="{Binding SelectedElementName, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                    <Grid ColumnSpacing="8" RowSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="Selected" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedElementName}" />
+                        <TextBlock Grid.Row="1" Text="Details" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedElementDetails}" TextWrapping="Wrap" />
+                        <TextBlock Grid.Row="2" Text="Walls" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding WallCountText}" />
+                        <TextBlock Grid.Row="3" Text="APs" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding ApCountText}" />
+                    </Grid>
+                    <StackPanel Orientation="Horizontal" Spacing="16">
+                        <CheckBox Content="Visible" IsChecked="{Binding SelectedVisible, Mode=TwoWay}" />
+                        <CheckBox Content="Locked" IsChecked="{Binding SelectedLocked, Mode=TwoWay}" />
+                    </StackPanel>
+
+                    <Grid ColumnSpacing="8" RowSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <NumberBox Header="X cm" Value="{Binding SelectedX, Mode=TwoWay}" SpinButtonPlacementMode="Compact" />
+                        <NumberBox Grid.Column="1" Header="Y cm" Value="{Binding SelectedY, Mode=TwoWay}" SpinButtonPlacementMode="Compact" />
+                        <NumberBox Grid.Row="1" Header="Width/Length cm" Value="{Binding SelectedPrimarySize, Mode=TwoWay}" SpinButtonPlacementMode="Compact" />
+                        <NumberBox Grid.Row="1" Grid.Column="1" Header="Height/Thickness cm" Value="{Binding SelectedHeight, Mode=TwoWay}" SpinButtonPlacementMode="Compact" />
+                        <NumberBox Grid.Row="2" Header="Rotation" Value="{Binding SelectedRotation, Mode=TwoWay}" SpinButtonPlacementMode="Compact" />
+                        <NumberBox Grid.Row="2" Grid.Column="1" Header="Attenuation dB" Value="{Binding SelectedAttenuation, Mode=TwoWay}" SpinButtonPlacementMode="Compact" />
+                    </Grid>
+
+                    <ComboBox Header="Material" ItemsSource="{Binding MaterialOptions}" SelectedItem="{Binding SelectedMaterial, Mode=TwoWay}" DisplayMemberPath="Name" HorizontalAlignment="Stretch" />
+
+                    <Border Padding="12" CornerRadius="6" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="AP" FontWeight="SemiBold" />
+                            <CheckBox Content="Enabled" IsChecked="{Binding ApEnabled, Mode=TwoWay}" />
+                            <Grid ColumnSpacing="8" RowSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <NumberBox Header="Tx Power" Value="{Binding ApTxPower, Mode=TwoWay}" SpinButtonPlacementMode="Compact" />
+                                <NumberBox Grid.Column="1" Header="Channel" Value="{Binding ApChannel, Mode=TwoWay}" SpinButtonPlacementMode="Compact" />
+                                <NumberBox Grid.Row="1" Header="Bandwidth" Value="{Binding ApBandwidth, Mode=TwoWay}" SpinButtonPlacementMode="Compact" />
+                                <NumberBox Grid.Row="1" Grid.Column="1" Header="Antenna Gain" Value="{Binding ApAntennaGain, Mode=TwoWay}" SpinButtonPlacementMode="Compact" />
+                                <NumberBox Grid.Row="2" Grid.ColumnSpan="2" Header="Coverage Target dBm" Value="{Binding ApCoverageTarget, Mode=TwoWay}" SpinButtonPlacementMode="Compact" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Padding="12" CornerRadius="6" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="User Signal" FontWeight="SemiBold" />
+                            <NumberBox Header="Weight" Value="{Binding UserWeight, Mode=TwoWay}" SpinButtonPlacementMode="Compact" />
+                            <TextBlock Text="{Binding UserSignalText}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <Button Content="Add Route Point" Command="{Binding AddRoutePointCommand}" HorizontalAlignment="Stretch" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Padding="12" CornerRadius="6" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Recommendation" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding PendingRecommendationText}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="{Binding OptimizationSummaryText}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <Grid Grid.Row="2" Grid.ColumnSpan="3" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="420" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid Padding="14" ColumnSpacing="16" RowSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.ColumnSpan="4" Text="Analysis" FontSize="16" FontWeight="SemiBold" />
+                <TextBlock Grid.Row="1" Text="Avg RSSI" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding AverageRssiText}" />
+                <TextBlock Grid.Row="1" Grid.Column="2" Text="Min RSSI" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding MinimumRssiText}" />
+                <TextBlock Grid.Row="2" Text="Coverage" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CoverageText}" />
+                <TextBlock Grid.Row="2" Grid.Column="2" Text="Shadow" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding ShadowText}" />
+                <TextBlock Grid.Row="3" Text="Samples" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SampleCountText}" />
+                <TextBlock Grid.Row="3" Grid.Column="2" Text="Objects/Users" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <TextBlock Grid.Row="3" Grid.Column="3" Text="{Binding ObjectUserCountText}" />
+            </Grid>
+            <ListView Grid.Column="1" ItemsSource="{Binding LogLines}" BorderThickness="0" />
+        </Grid>
+
+        <Grid Grid.Row="3" Grid.ColumnSpan="3" Padding="10,0" Background="{ThemeResource LayerFillColorDefaultBrush}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="1" Text="{Binding PointerText}" Margin="16,0,0,0" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="2" Text="{Binding ZoomText}" Margin="16,0,0,0" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="3" Text="{Binding SelectedCountText}" Margin="16,0,0,0" VerticalAlignment="Center" />
+        </Grid>
+    </Grid>
+</Window>

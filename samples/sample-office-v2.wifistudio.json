@@ -1,0 +1,154 @@
+{
+  "schemaVersion": "2.0",
+  "projectName": "Office Wi-Fi Plan v2",
+  "floorPlan": {
+    "name": "Main Floor",
+    "widthCm": 2500,
+    "heightCm": 1600,
+    "gridSizeCm": 25,
+    "walls": [
+      {
+        "id": "wall-concrete-core",
+        "name": "Concrete Core Wall",
+        "isVisible": true,
+        "isLocked": false,
+        "movable": true,
+        "zIndex": 10,
+        "center": { "x": 1250, "y": 800 },
+        "lengthCm": 900,
+        "thicknessCm": 18,
+        "rotationDegrees": 90,
+        "materialId": "concrete",
+        "overrideAttenuationDb": 12,
+        "blocksSignal": true
+      },
+      {
+        "id": "wall-glass-meeting",
+        "name": "Glass Meeting Wall",
+        "isVisible": true,
+        "isLocked": false,
+        "movable": true,
+        "zIndex": 10,
+        "center": { "x": 760, "y": 560 },
+        "lengthCm": 820,
+        "thicknessCm": 10,
+        "rotationDegrees": 0,
+        "materialId": "glass",
+        "overrideAttenuationDb": 3,
+        "blocksSignal": true
+      }
+    ],
+    "objects": [
+      {
+        "id": "obj-conference-table",
+        "name": "Conference Table",
+        "isVisible": true,
+        "isLocked": false,
+        "movable": true,
+        "zIndex": 20,
+        "type": "ConferenceTable",
+        "x": 700,
+        "y": 650,
+        "width": 300,
+        "height": 120,
+        "rotation": 0,
+        "material": "wood",
+        "attenuationDb": 3,
+        "blocksSignal": true
+      },
+      {
+        "id": "obj-server-rack",
+        "name": "Server Rack",
+        "isVisible": true,
+        "isLocked": false,
+        "movable": true,
+        "zIndex": 25,
+        "type": "ServerRack",
+        "x": 2100,
+        "y": 1250,
+        "width": 80,
+        "height": 110,
+        "rotation": 0,
+        "material": "metal",
+        "attenuationDb": 12,
+        "blocksSignal": true
+      }
+    ],
+    "accessPoints": [
+      {
+        "id": "ap-01",
+        "name": "AP-01",
+        "isVisible": true,
+        "isLocked": false,
+        "movable": true,
+        "zIndex": 35,
+        "position": { "x": 620, "y": 420 },
+        "band": "Ghz5",
+        "txPowerDbm": 18,
+        "channel": 36,
+        "bandwidthMhz": 40,
+        "antennaGainDbi": 3,
+        "coverageTargetDbm": -67,
+        "isEnabled": true
+      }
+    ],
+    "users": [
+      {
+        "id": "user-a",
+        "name": "User A",
+        "isVisible": true,
+        "isLocked": false,
+        "movable": true,
+        "zIndex": 40,
+        "type": "FixedUser",
+        "position": { "x": 1850, "y": 1050 },
+        "weight": 5,
+        "mobilityMode": "Fixed",
+        "route": [],
+        "attenuationDb": 2,
+        "blocksSignal": false
+      },
+      {
+        "id": "user-mobile",
+        "name": "Mobile User",
+        "isVisible": true,
+        "isLocked": false,
+        "movable": true,
+        "zIndex": 40,
+        "type": "MobileUser",
+        "position": { "x": 450, "y": 1300 },
+        "weight": 3,
+        "mobilityMode": "Mobile",
+        "route": [
+          { "x": 1200, "y": 1300 },
+          { "x": 2100, "y": 1100 }
+        ],
+        "attenuationDb": 2,
+        "blocksSignal": false
+      }
+    ]
+  },
+  "simulationSettings": {
+    "frequencyBand": "Ghz5",
+    "heatmapType": "Rssi",
+    "sampleResolutionCm": 50,
+    "coverageThresholdDbm": -67,
+    "shadowThresholdDbm": -82,
+    "noiseFloorDbm": -92,
+    "interferencePenaltyDb": 0
+  },
+  "optimizationResults": [],
+  "heatmapDisplay": {
+    "mode": "Rssi",
+    "isVisible": true,
+    "opacity": 0.82,
+    "thresholdDbm": -67
+  },
+  "layerState": {
+    "structuresVisible": true,
+    "objectsVisible": true,
+    "accessPointsVisible": true,
+    "usersVisible": true,
+    "heatmapVisible": true
+  }
+}

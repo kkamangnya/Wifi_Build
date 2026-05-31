@@ -1,0 +1,110 @@
+[
+  {
+    "id": "drywall",
+    "name": "Gypsum Board",
+    "category": "Wall",
+    "baseAttenuationDb": 3.0,
+    "attenuationMultiplier2_4Ghz": 0.86,
+    "attenuationMultiplier5Ghz": 1.0,
+    "attenuationMultiplier6Ghz": 1.14,
+    "color": "#D3C8B8",
+    "description": "Lightweight interior gypsum wall.",
+    "isConductive": false
+  },
+  {
+    "id": "wood",
+    "name": "Wood",
+    "category": "Wall",
+    "baseAttenuationDb": 4.0,
+    "attenuationMultiplier2_4Ghz": 0.86,
+    "attenuationMultiplier5Ghz": 1.0,
+    "attenuationMultiplier6Ghz": 1.14,
+    "color": "#B8834B",
+    "description": "Wood wall, door, and furniture material.",
+    "isConductive": false
+  },
+  {
+    "id": "glass",
+    "name": "Glass",
+    "category": "Wall",
+    "baseAttenuationDb": 3.0,
+    "attenuationMultiplier2_4Ghz": 0.86,
+    "attenuationMultiplier5Ghz": 1.0,
+    "attenuationMultiplier6Ghz": 1.14,
+    "color": "#8FD3FF",
+    "description": "Glass wall or door.",
+    "isConductive": false
+  },
+  {
+    "id": "brick",
+    "name": "Brick",
+    "category": "Wall",
+    "baseAttenuationDb": 8.0,
+    "attenuationMultiplier2_4Ghz": 0.86,
+    "attenuationMultiplier5Ghz": 1.0,
+    "attenuationMultiplier6Ghz": 1.14,
+    "color": "#A54E3E",
+    "description": "Brick wall with moderate RF loss.",
+    "isConductive": false
+  },
+  {
+    "id": "concrete",
+    "name": "Concrete",
+    "category": "Wall",
+    "baseAttenuationDb": 12.0,
+    "attenuationMultiplier2_4Ghz": 0.9,
+    "attenuationMultiplier5Ghz": 1.08,
+    "attenuationMultiplier6Ghz": 1.22,
+    "color": "#9EA3A8",
+    "description": "Dense structural concrete.",
+    "isConductive": false
+  },
+  {
+    "id": "metal",
+    "name": "Metal",
+    "category": "Wall",
+    "baseAttenuationDb": 20.0,
+    "attenuationMultiplier2_4Ghz": 0.95,
+    "attenuationMultiplier5Ghz": 1.12,
+    "attenuationMultiplier6Ghz": 1.28,
+    "color": "#66717E",
+    "description": "Conductive RF blocking material.",
+    "isConductive": true
+  },
+  {
+    "id": "acoustic-wall",
+    "name": "Acoustic Wall",
+    "category": "Wall",
+    "baseAttenuationDb": 18.0,
+    "attenuationMultiplier2_4Ghz": 0.92,
+    "attenuationMultiplier5Ghz": 1.1,
+    "attenuationMultiplier6Ghz": 1.25,
+    "color": "#7E6A8A",
+    "description": "Dense acoustic wall assembly.",
+    "isConductive": false
+  },
+  {
+    "id": "insulated-wall",
+    "name": "Insulated Wall",
+    "category": "Wall",
+    "baseAttenuationDb": 10.0,
+    "attenuationMultiplier2_4Ghz": 0.88,
+    "attenuationMultiplier5Ghz": 1.05,
+    "attenuationMultiplier6Ghz": 1.18,
+    "color": "#C6D7B9",
+    "description": "Insulated wall assembly.",
+    "isConductive": false
+  },
+  {
+    "id": "composite-wall",
+    "name": "Composite Wall",
+    "category": "Wall",
+    "baseAttenuationDb": 14.0,
+    "attenuationMultiplier2_4Ghz": 0.9,
+    "attenuationMultiplier5Ghz": 1.08,
+    "attenuationMultiplier6Ghz": 1.22,
+    "color": "#A2A08F",
+    "description": "Mixed material wall assembly.",
+    "isConductive": false
+  }
+]
