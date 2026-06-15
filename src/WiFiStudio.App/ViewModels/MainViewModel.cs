@@ -17,11 +17,13 @@ public sealed class MainViewModel : ObservableObject
     private readonly ApPlacementOptimizer _optimizer = new();
     private readonly UserSignalAnalyzer _userAnalyzer = new();
     private readonly UserRouteSimulationEngine _routeAnalyzer = new();
+    private readonly ExperimentRunner _experimentRunner = new();
     private readonly ProjectHistory _history = new();
     private CancellationTokenSource? _operationCts;
     private ProjectModel _project;
     private HeatmapResult? _heatmapResult;
     private OptimizationResult? _optimizationResult;
+    private ExperimentRunResult? _lastExperiment;
     private AccessPointRecommendation? _pendingRecommendation;
     private CanvasTool _activeTool = CanvasTool.Select;
     private PlanObjectType _activeObjectType = PlanObjectType.Desk;
@@ -40,6 +42,9 @@ public sealed class MainViewModel : ObservableObject
     private string _selectedElementDetails = "Select an object";
     private string _userSignalText = "No user selected";
     private string _optimizationSummaryText = "No optimization result";
+    private string _experimentSummaryText = "Run Experiment to compare the five structure and material conditions.";
+    private string _experimentComparisonText = "Condition 5 Before/After comparison will appear after Run Experiment.";
+    private string _experimentExportDirectoryText = "No experiment export yet.";
     private bool _snapEnabled = true;
     private bool _hadHeatmapBeforeManipulation;
     private string? _selectedRecentProject;
@@ -63,12 +68,15 @@ public sealed class MainViewModel : ObservableObject
         SaveProjectCommand = new AsyncRelayCommand(_ => SaveAsync());
         OpenProjectCommand = new AsyncRelayCommand(_ => OpenAsync());
         RunSimulationCommand = new AsyncRelayCommand(_ => RunSimulationAsync());
+        RunExperimentCommand = new AsyncRelayCommand(_ => RunExperimentAsync());
         CancelSimulationCommand = new RelayCommand(_ => CancelActiveOperation());
         RecommendApCommand = new AsyncRelayCommand(_ => RecommendApAsync());
         ExportCsvCommand = new AsyncRelayCommand(_ => ExportCsvAsync(), _ => HeatmapResult is not null);
         ExportSvgCommand = new AsyncRelayCommand(_ => ExportSvgAsync());
         ExportPngCommand = new AsyncRelayCommand(_ => ExportPngAsync(), _ => HeatmapResult is not null);
         ExportPdfCommand = new AsyncRelayCommand(_ => ExportPdfAsync());
+        ExportExperimentCsvCommand = new AsyncRelayCommand(_ => ExportExperimentCsvAsync(), _ => LastExperiment is not null);
+        ExportReportImageCommand = new AsyncRelayCommand(_ => ExportReportImagesAsync(), _ => LastExperiment is not null);
         ImportMaterialsCommand = new AsyncRelayCommand(_ => ImportMaterialsAsync());
         ExportMaterialsCommand = new AsyncRelayCommand(_ => ExportMaterialsAsync());
         RunWizardCommand = new RelayCommand(_ => RunBeginnerWizard());
@@ -116,6 +124,19 @@ public sealed class MainViewModel : ObservableObject
             if (SetProperty(ref _optimizationResult, value))
             {
                 OnPropertyChanged(nameof(PendingRecommendationText));
+            }
+        }
+    }
+
+    public ExperimentRunResult? LastExperiment
+    {
+        get => _lastExperiment;
+        private set
+        {
+            if (SetProperty(ref _lastExperiment, value))
+            {
+                ExportExperimentCsvCommand.RaiseCanExecuteChanged();
+                ExportReportImageCommand.RaiseCanExecuteChanged();
             }
         }
     }
@@ -408,7 +429,26 @@ public sealed class MainViewModel : ObservableObject
         private set => SetProperty(ref _optimizationSummaryText, value);
     }
 
+    public string ExperimentSummaryText
+    {
+        get => _experimentSummaryText;
+        private set => SetProperty(ref _experimentSummaryText, value);
+    }
+
+    public string ExperimentComparisonText
+    {
+        get => _experimentComparisonText;
+        private set => SetProperty(ref _experimentComparisonText, value);
+    }
+
+    public string ExperimentExportDirectoryText
+    {
+        get => _experimentExportDirectoryText;
+        private set => SetProperty(ref _experimentExportDirectoryText, value);
+    }
+
     public ObservableCollection<string> LogLines { get; } = [];
+    public ObservableCollection<ExperimentResultRow> ExperimentRows { get; } = [];
 
     public RelayCommand SetToolCommand { get; }
     public RelayCommand NewProjectCommand { get; }
@@ -418,12 +458,15 @@ public sealed class MainViewModel : ObservableObject
     public AsyncRelayCommand SaveProjectCommand { get; }
     public AsyncRelayCommand OpenProjectCommand { get; }
     public AsyncRelayCommand RunSimulationCommand { get; }
+    public AsyncRelayCommand RunExperimentCommand { get; }
     public RelayCommand CancelSimulationCommand { get; }
     public AsyncRelayCommand RecommendApCommand { get; }
     public AsyncRelayCommand ExportCsvCommand { get; }
     public AsyncRelayCommand ExportSvgCommand { get; }
     public AsyncRelayCommand ExportPngCommand { get; }
     public AsyncRelayCommand ExportPdfCommand { get; }
+    public AsyncRelayCommand ExportExperimentCsvCommand { get; }
+    public AsyncRelayCommand ExportReportImageCommand { get; }
     public AsyncRelayCommand ImportMaterialsCommand { get; }
     public AsyncRelayCommand ExportMaterialsCommand { get; }
     public RelayCommand RunWizardCommand { get; }
@@ -1100,6 +1143,221 @@ public sealed class MainViewModel : ObservableObject
         }
     }
 
+    private async Task RunExperimentAsync()
+    {
+        CancelActiveOperation();
+        _operationCts = new CancellationTokenSource();
+        var token = _operationCts.Token;
+
+        try
+        {
+            SimulationState = "Experiment 0/5";
+            StatusText = "Running automated RF experiment";
+            ExperimentRows.Clear();
+            ExperimentSummaryText = "Experiment is running...";
+            LastExperiment = null;
+            var progress = new Progress<ExperimentProgress>(value =>
+            {
+                SimulationState = $"Experiment {value.ConditionIndex}/{value.ConditionCount}";
+                StatusText = $"{value.ConditionName}: {value.Stage}";
+            });
+
+            var result = await _experimentRunner.RunAsync(Project, progress, token);
+            foreach (var row in result.Rows)
+            {
+                ExperimentRows.Add(row);
+            }
+
+            LastExperiment = result;
+            ExperimentSummaryText = result.Summary;
+            ExperimentComparisonText = BuildExperimentComparisonText(result);
+            var directory = await ExportExperimentArtifactsAsync(result, token);
+            ExperimentExportDirectoryText = directory;
+            SimulationState = "Experiment completed";
+            StatusText = $"Experiment results saved to {directory}";
+            Log($"Experiment completed: {result.Rows.Count} user measurements across five conditions.");
+            Log($"Experiment CSV and heatmaps saved: {directory}");
+        }
+        catch (OperationCanceledException)
+        {
+            SimulationState = "Canceled";
+            StatusText = "Experiment canceled";
+            ExperimentSummaryText = "Experiment was canceled before all conditions completed.";
+            ExperimentComparisonText = "Condition 5 comparison was not completed.";
+            Log("Experiment canceled.");
+        }
+        catch (Exception ex)
+        {
+            SimulationState = "Failed";
+            StatusText = "Experiment failed";
+            ExperimentSummaryText = $"Experiment failed: {ex.Message}";
+            ExperimentComparisonText = "Condition 5 comparison failed.";
+            Log($"Experiment failed: {ex.Message}");
+        }
+    }
+
+    private async Task ExportExperimentCsvAsync()
+    {
+        if (LastExperiment is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var path = ExportPath("experiment-results", ".csv");
+            await ExperimentCsvExporter.ExportAsync(LastExperiment, path, CancellationToken.None);
+            StatusText = $"Experiment CSV saved to {path}";
+            Log($"Exported experiment CSV: {path}");
+        }
+        catch (Exception ex)
+        {
+            Log($"Experiment CSV export failed: {ex.Message}");
+        }
+    }
+
+    private async Task ExportReportImagesAsync()
+    {
+        if (LastExperiment is null)
+        {
+            Log("Run Experiment before exporting report images.");
+            return;
+        }
+
+        try
+        {
+            var directory = await ExportReportImageArtifactsAsync(LastExperiment, CancellationToken.None);
+            ExperimentExportDirectoryText = directory;
+            StatusText = $"Report images saved to {directory}";
+            Log($"Exported report images: {directory}");
+        }
+        catch (Exception ex)
+        {
+            Log($"Report image export failed: {ex.Message}");
+        }
+    }
+
+    private static async Task<string> ExportExperimentArtifactsAsync(ExperimentRunResult result, CancellationToken cancellationToken)
+    {
+        var stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
+        var directory = Path.Combine(ExportDirectory, $"Experiment-{stamp}");
+        Directory.CreateDirectory(directory);
+        await ExperimentCsvExporter.ExportAsync(result, Path.Combine(directory, "experiment-results.csv"), cancellationToken);
+        var imagePaths = new List<string>();
+
+        foreach (var (conditionId, heatmap) in result.Heatmaps)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var rows = result.Rows.Where(row => row.ConditionId == conditionId).ToList();
+            if (!result.DisplayProjects.TryGetValue(conditionId, out var project))
+            {
+                continue;
+            }
+
+            var imagePath = Path.Combine(directory, $"{SafeFileName(conditionId)}-annotated-heatmap.png");
+            await ExperimentHeatmapPngExporter.ExportConditionAsync(
+                project,
+                heatmap,
+                rows,
+                imagePath,
+                widthPx: 2400,
+                cancellationToken: cancellationToken);
+            imagePaths.Add(imagePath);
+        }
+
+        const string optimizedId = "condition-5-user-optimized";
+        if (result.BaselineProjects.TryGetValue(optimizedId, out var beforeProject)
+            && result.OptimizedProjects.TryGetValue(optimizedId, out var afterProject)
+            && result.BaselineHeatmaps.TryGetValue(optimizedId, out var beforeHeatmap)
+            && result.OptimizedHeatmaps.TryGetValue(optimizedId, out var afterHeatmap))
+        {
+            var rows = result.Rows.Where(row => row.ConditionId == optimizedId).ToList();
+            var beforePath = Path.Combine(directory, "condition-5-before-annotated-heatmap.png");
+            var afterPath = Path.Combine(directory, "condition-5-after-annotated-heatmap.png");
+            var deltaPath = Path.Combine(directory, "condition-5-delta-improvement-heatmap.png");
+            await ExperimentHeatmapPngExporter.ExportConditionAsync(beforeProject, beforeHeatmap, rows, beforePath, widthPx: 2400, cancellationToken: cancellationToken);
+            await ExperimentHeatmapPngExporter.ExportConditionAsync(afterProject, afterHeatmap, rows, afterPath, widthPx: 2400, cancellationToken: cancellationToken);
+            await ExperimentHeatmapPngExporter.ExportDifferenceAsync(beforeProject, beforeHeatmap, afterProject, afterHeatmap, rows, deltaPath, widthPx: 2400, cancellationToken: cancellationToken);
+            imagePaths.Add(beforePath);
+            imagePaths.Add(afterPath);
+            imagePaths.Add(deltaPath);
+        }
+
+        await ExperimentTextReportExporter.ExportAsync(
+            result,
+            Path.Combine(directory, "experiment-summary.txt"),
+            imagePaths,
+            cancellationToken);
+
+        return directory;
+    }
+
+    private static async Task<string> ExportReportImageArtifactsAsync(ExperimentRunResult result, CancellationToken cancellationToken)
+    {
+        var stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
+        var directory = Path.Combine(ExportDirectory, $"ExperimentReport-{stamp}");
+        Directory.CreateDirectory(directory);
+        var imagePaths = new List<string>();
+
+        foreach (var (conditionId, heatmap) in result.Heatmaps)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!result.DisplayProjects.TryGetValue(conditionId, out var project))
+            {
+                continue;
+            }
+
+            var rows = result.Rows.Where(row => row.ConditionId == conditionId).ToList();
+            var path = Path.Combine(directory, $"report-{SafeFileName(conditionId)}.png");
+            await ExperimentReportImageExporter.ExportConditionAsync(
+                project,
+                heatmap,
+                rows,
+                path,
+                widthPx: 2400,
+                cancellationToken: cancellationToken);
+            imagePaths.Add(path);
+        }
+
+        const string optimizedId = "condition-5-user-optimized";
+        if (result.BaselineProjects.TryGetValue(optimizedId, out var beforeProject)
+            && result.OptimizedProjects.TryGetValue(optimizedId, out var afterProject)
+            && result.BaselineHeatmaps.TryGetValue(optimizedId, out var beforeHeatmap)
+            && result.OptimizedHeatmaps.TryGetValue(optimizedId, out var afterHeatmap))
+        {
+            var rows = result.Rows.Where(row => row.ConditionId == optimizedId).ToList();
+            var beforePath = Path.Combine(directory, "report-condition-5-before.png");
+            var afterPath = Path.Combine(directory, "report-condition-5-after.png");
+            var deltaPath = Path.Combine(directory, "report-condition-5-delta.png");
+            await ExperimentReportImageExporter.ExportConditionAsync(beforeProject, beforeHeatmap, rows, beforePath, widthPx: 2400, cancellationToken: cancellationToken);
+            await ExperimentReportImageExporter.ExportConditionAsync(afterProject, afterHeatmap, rows, afterPath, widthPx: 2400, cancellationToken: cancellationToken);
+            await ExperimentReportImageExporter.ExportDifferenceAsync(beforeProject, beforeHeatmap, afterProject, afterHeatmap, rows, deltaPath, widthPx: 2400, cancellationToken: cancellationToken);
+            imagePaths.Add(beforePath);
+            imagePaths.Add(afterPath);
+            imagePaths.Add(deltaPath);
+        }
+
+        await ExperimentTextReportExporter.ExportAsync(
+            result,
+            Path.Combine(directory, "report-image-summary.txt"),
+            imagePaths,
+            cancellationToken);
+
+        return directory;
+    }
+
+    private static string BuildExperimentComparisonText(ExperimentRunResult result)
+    {
+        var rows = result.Rows.Where(row => row.ConditionId == "condition-5-user-optimized").ToList();
+        if (rows.Count == 0)
+        {
+            return "Condition 5 comparison has no user measurements.";
+        }
+
+        return string.Join(Environment.NewLine, rows.Select(row =>
+            $"{row.UserName}: {row.BeforeOptimizationRssi:F1} -> {row.AfterOptimizationRssi:F1} dBm ({row.OptimizationDeltaDb:+0.0;-0.0;0.0} dB), {row.QualityDisplay}"));
+    }
+
     private async Task ImportMaterialsAsync()
     {
         try
@@ -1408,6 +1666,11 @@ public sealed class MainViewModel : ObservableObject
         OnPropertyChanged(nameof(SelectedFrequency));
         OnPropertyChanged(nameof(SelectedHeatmapMode));
         Select(null, SelectedElementKind.None);
+        ExperimentRows.Clear();
+        LastExperiment = null;
+        ExperimentSummaryText = "Run Experiment to compare the five structure and material conditions.";
+        ExperimentComparisonText = "Condition 5 Before/After comparison will appear after Run Experiment.";
+        ExperimentExportDirectoryText = "No experiment export yet.";
         ClearAnalysis();
         Log(logMessage);
     }
@@ -1797,6 +2060,12 @@ public sealed class MainViewModel : ObservableObject
         Directory.CreateDirectory(ExportDirectory);
         var stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
         return Path.Combine(ExportDirectory, $"wifi-studio-{suffix}-{stamp}{extension}");
+    }
+
+    private static string SafeFileName(string value)
+    {
+        var invalid = Path.GetInvalidFileNameChars();
+        return new string(value.Select(character => invalid.Contains(character) ? '-' : character).ToArray());
     }
 
     private static string AppDataDirectory =>

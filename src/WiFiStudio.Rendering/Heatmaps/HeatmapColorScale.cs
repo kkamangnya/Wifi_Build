@@ -4,29 +4,45 @@ namespace WiFiStudio.Rendering.Heatmaps;
 
 public readonly record struct BgraColor(byte B, byte G, byte R, byte A);
 
+public readonly record struct RssiLegendBand(string Label, double MinDbm, double MaxDbm, BgraColor Color);
+
 public static class HeatmapColorScale
 {
+    public const double FixedMinRssiDbm = -90;
+    public const double FixedMaxRssiDbm = -30;
+
+    public static IReadOnlyList<RssiLegendBand> RssiLegendBands { get; } =
+    [
+        new("Green >= -50 dBm", -50, FixedMaxRssiDbm, new BgraColor(48, 151, 33, 212)),
+        new("Light Green -50 to -67 dBm", -67, -50, new BgraColor(86, 217, 126, 204)),
+        new("Yellow -67 to -75 dBm", -75, -67, new BgraColor(72, 216, 255, 204)),
+        new("Orange -75 to -85 dBm", -85, -75, new BgraColor(26, 140, 255, 210)),
+        new("Red <= -85 dBm", FixedMinRssiDbm, -85, new BgraColor(49, 49, 224, 216))
+    ];
+
     public static BgraColor ForRssi(double rssiDbm)
     {
-        if (rssiDbm >= -55)
+        if (rssiDbm >= -50)
         {
-            return new BgraColor(63, 201, 39, 176);
+            return RssiLegendBands[0].Color;
         }
 
-        if (rssiDbm <= -90)
+        if (rssiDbm >= -67)
         {
-            return new BgraColor(60, 76, 231, 168);
+            return RssiLegendBands[1].Color;
         }
 
-        var t = Math.Clamp((rssiDbm + 90.0) / 35.0, 0.0, 1.0);
-        var weak = new BgraColor(60, 76, 231, 176);
-        var mid = new BgraColor(76, 201, 242, 168);
-        var strong = new BgraColor(63, 201, 39, 176);
+        if (rssiDbm >= -75)
+        {
+            return RssiLegendBands[2].Color;
+        }
 
-        var a = t < 0.5 ? weak : mid;
-        var b = t < 0.5 ? mid : strong;
-        var local = t < 0.5 ? t * 2.0 : (t - 0.5) * 2.0;
-        return Lerp(a, b, local);
+        if (rssiDbm >= -85)
+        {
+            return RssiLegendBands[3].Color;
+        }
+
+        return RssiLegendBands[4].Color;
     }
 
     public static BgraColor ForSample(RfSamplePoint sample, HeatmapType mode)

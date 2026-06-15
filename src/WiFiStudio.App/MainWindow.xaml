@@ -8,7 +8,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="176" />
+            <RowDefinition Height="360" />
             <RowDefinition Height="28" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -29,6 +29,11 @@
                         Command="{Binding RecommendApCommand}"
                         Content="Recommend Best AP"
                         Style="{StaticResource AccentButtonStyle}" />
+                    <Button
+                        MinWidth="160"
+                        Command="{Binding RunExperimentCommand}"
+                        Content="Run Experiment"
+                        Style="{StaticResource AccentButtonStyle}" />
                     <TextBlock Text="{Binding SimulationState}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                 </StackPanel>
             </CommandBar.Content>
@@ -46,6 +51,8 @@
             <AppBarButton Icon="Download" Label="PNG" Command="{Binding ExportPngCommand}" />
             <AppBarButton Icon="Download" Label="SVG" Command="{Binding ExportSvgCommand}" />
             <AppBarButton Icon="Download" Label="PDF" Command="{Binding ExportPdfCommand}" />
+            <AppBarButton Icon="Download" Label="Experiment CSV" Command="{Binding ExportExperimentCsvCommand}" />
+            <AppBarButton Icon="Pictures" Label="Report Image" Command="{Binding ExportReportImageCommand}" />
         </CommandBar>
 
         <Border Grid.Row="1" Grid.Column="0" Padding="12" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,1,0">
@@ -261,7 +268,144 @@
                 <TextBlock Grid.Row="3" Grid.Column="2" Text="Objects/Users" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                 <TextBlock Grid.Row="3" Grid.Column="3" Text="{Binding ObjectUserCountText}" />
             </Grid>
-            <ListView Grid.Column="1" ItemsSource="{Binding LogLines}" BorderThickness="0" />
+            <TabView Grid.Column="1" IsAddTabButtonVisible="False" TabWidthMode="SizeToContent">
+                <TabViewItem Header="Experiment">
+                    <Grid Padding="8,4,12,8" RowSpacing="6">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="126" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="{Binding ExperimentSummaryText}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <Grid Grid.Row="1" RowSpacing="2">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="28" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid Background="{ThemeResource LayerFillColorDefaultBrush}" ColumnSpacing="8" Padding="8,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="190" />
+                                    <ColumnDefinition Width="94" />
+                                    <ColumnDefinition Width="92" />
+                                    <ColumnDefinition Width="106" />
+                                    <ColumnDefinition Width="112" />
+                                    <ColumnDefinition Width="116" />
+                                    <ColumnDefinition Width="120" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="ConditionName" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="UserRSSI" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2" Text="Quality" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="3" Text="AverageRSSI" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="4" Text="MinimumRSSI" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="5" Text="DeadZoneRatio" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="6" Text="ConnectedAP" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            </Grid>
+                            <ListView Grid.Row="1" ItemsSource="{Binding ExperimentRows}" BorderThickness="0">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid MinHeight="28" ColumnSpacing="8" Padding="8,2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="190" />
+                                                <ColumnDefinition Width="94" />
+                                                <ColumnDefinition Width="92" />
+                                                <ColumnDefinition Width="106" />
+                                                <ColumnDefinition Width="112" />
+                                                <ColumnDefinition Width="116" />
+                                                <ColumnDefinition Width="120" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding ConditionName}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="1" Text="{Binding UserRssiDisplay}" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="2" Text="{Binding QualityDisplay}" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="3" Text="{Binding AverageRssiDisplay}" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="4" Text="{Binding MinimumRssiDisplay}" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="5" Text="{Binding DeadZoneRatioDisplay}" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="6" Text="{Binding ConnectedAp}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </Grid>
+                        <StackPanel Grid.Row="2" Spacing="2">
+                            <TextBlock Text="{Binding ExperimentComparisonText}" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="{Binding ExperimentExportDirectoryText}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                        </StackPanel>
+                        <ScrollViewer Grid.Row="3" HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Enabled" VerticalScrollBarVisibility="Disabled">
+                            <Grid Width="1990">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="32" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <Grid Background="{ThemeResource LayerFillColorDefaultBrush}" ColumnSpacing="8" Padding="8,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="190" />
+                                        <ColumnDefinition Width="210" />
+                                        <ColumnDefinition Width="240" />
+                                        <ColumnDefinition Width="180" />
+                                        <ColumnDefinition Width="100" />
+                                        <ColumnDefinition Width="100" />
+                                        <ColumnDefinition Width="105" />
+                                        <ColumnDefinition Width="105" />
+                                        <ColumnDefinition Width="110" />
+                                        <ColumnDefinition Width="120" />
+                                        <ColumnDefinition Width="100" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="ConditionName" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="StructureDescription" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="APPosition" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="3" Text="UserPosition" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="4" Text="UserRSSI" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="5" Text="Quality" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="6" Text="AverageRSSI" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="7" Text="MinimumRSSI" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="8" Text="DeadZoneRatio" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="9" Text="ConnectedAP" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="10" Text="Opt. Delta" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="11" Text="AnalysisNote" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                </Grid>
+                                <ListView Grid.Row="1" ItemsSource="{Binding ExperimentRows}" BorderThickness="0">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Width="1974" MinHeight="38" ColumnSpacing="8" Padding="8,3">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="190" />
+                                                    <ColumnDefinition Width="210" />
+                                                    <ColumnDefinition Width="240" />
+                                                    <ColumnDefinition Width="180" />
+                                                    <ColumnDefinition Width="100" />
+                                                    <ColumnDefinition Width="100" />
+                                                    <ColumnDefinition Width="105" />
+                                                    <ColumnDefinition Width="105" />
+                                                    <ColumnDefinition Width="110" />
+                                                    <ColumnDefinition Width="120" />
+                                                    <ColumnDefinition Width="100" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding ConditionName}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="1" Text="{Binding StructureDescription}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="2" Text="{Binding ApPosition}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="3" Text="{Binding UserPositionDisplay}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="4" Text="{Binding UserRssiDisplay}" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="5" Text="{Binding QualityDisplay}" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="6" Text="{Binding AverageRssiDisplay}" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="7" Text="{Binding MinimumRssiDisplay}" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="8" Text="{Binding DeadZoneRatioDisplay}" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="9" Text="{Binding ConnectedAp}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="10" Text="{Binding OptimizationDeltaDisplay}" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="11" Text="{Binding AnalysisNote}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                            </Grid>
+                        </ScrollViewer>
+                    </Grid>
+                </TabViewItem>
+                <TabViewItem Header="Log">
+                    <ListView ItemsSource="{Binding LogLines}" BorderThickness="0" />
+                </TabViewItem>
+            </TabView>
         </Grid>
 
         <Grid Grid.Row="3" Grid.ColumnSpan="3" Padding="10,0" Background="{ThemeResource LayerFillColorDefaultBrush}">

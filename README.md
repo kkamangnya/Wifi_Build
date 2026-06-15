@@ -51,6 +51,9 @@ Windows-only Wi-Fi RF Planner MVP built with C#/.NET 10, WinUI 3, Windows App SD
 - User markers show quality color, RSSI, serving AP, and recommendation details in the inspector.
 - First-pass user-aware AP recommendation with before/after user RSSI deltas, AP count/channel/Tx recommendations, and accept action.
 - Route simulation summary and canvas markers for handover and dead-zone samples.
+- Experiment Mode runs five repeatable structure/material conditions, compares user and area RSSI, calculates user-centered AP optimization deltas, and generates an analysis summary.
+- Experiment runs automatically export a result CSV and one heatmap PNG per condition to `Documents\WiFiStudioExports\Experiment-<timestamp>`.
+- `Report Image` export creates report-friendly PNGs using Segoe UI or Noto Sans KR fonts at 1920px or higher, including condition heatmaps and Condition 5 Before/After/Delta comparison images.
 - Export: CSV analysis, SVG plan, PNG heatmap, PDF summary report, and material library JSON.
 - Beginner wizard command for a starter RF plan.
 
